@@ -60,8 +60,8 @@ export const getChallengeWords = async (prompt: string, targetLanguage: string, 
 const feedbackItemSchema = {
     type: Type.OBJECT,
     properties: {
-        score: { type: Type.NUMBER, description: "Score from 1 to 100." },
-        feedback: { type: Type.STRING, description: "1-2 short, constructive bullet points with examples. Be critical but encouraging." }
+        score: { type: Type.NUMBER, description: "Strict score from 1 to 100. Be critical." },
+        feedback: { type: Type.STRING, description: "1-2 short, constructive bullet points with examples. State clearly if the error was major." }
     },
     required: ["score", "feedback"]
 };
@@ -77,14 +77,14 @@ const feedbackSchema = {
             type: Type.OBJECT,
             description: "Detailed feedback on the user's speech.",
             properties: {
-                grammar: feedbackItemSchema,
+                grammar: { ...feedbackItemSchema, description: "Rigorous evaluation of syntax, verb conjugation, and sentence structure logic." },
                 pronunciation: feedbackItemSchema,
                 fluency: feedbackItemSchema,
                 vocabulary: { ...feedbackItemSchema, description: "Evaluation of word choice, range, and idiomatic language use." },
-                clarity: { ...feedbackItemSchema, description: "Evaluation of how clear and understandable the speech was." },
+                clarity: { ...feedbackItemSchema, description: "Evaluation of how clear the speech was AND IF IT DIRECTLY ANSWERED THE PROMPT." },
                 overallScore: {
                     type: Type.NUMBER,
-                    description: "A single, overall score from 1 to 100, averaging the other five scores."
+                    description: "A single, strict overall score from 1 to 100, averaging the other five scores."
                 },
                 challengeWordsUsed: {
                     type: Type.ARRAY,
@@ -122,18 +122,35 @@ export const evaluateSpeech = async (
             },
         };
 
-        const systemInstruction = `You are an expert language coach for a user learning ${targetLanguage} at a ${proficiency} level. Your name is 'Lingo'.
+        // Stricter System Instruction
+        const systemInstruction = `You are a strict, world-class linguistics examiner for a user learning ${targetLanguage} at a ${proficiency} level. Your name is 'Lingo'.
 Your task is to analyze the user's spoken response and provide a JSON object that strictly adheres to the provided schema.
-1.  **Transcription**: Transcribe the audio verbatim.
-2.  **Evaluation**: Evaluate the transcription on FIVE criteria: Grammar, Pronunciation, Fluency, Vocabulary, and Clarity.
-    -   Provide a score from 1-100 for each. Be critical and accurate. A beginner might get 40-60, an expert 85-95. Don't give 100 easily.
-    -   Provide 1-2 short, constructive bullet points for each.
-3.  **Overall Score**: Calculate the average of the five scores.
-4.  **Challenge Words**: Analyze the use of these words: [${challengeWords.join(', ')}]. For EACH word, specify if it was used and provide a brief comment on its contextual correctness.
-Do NOT deviate from the JSON schema.`;
+
+**STRICT SCORING GUIDELINES - DO NOT INFLATE SCORES:**
+
+1. **PROMPT RELEVANCE (CRITICAL):** The user MUST answer the specific prompt: "${dailyPrompt}". 
+   - If the response is off-topic, vague, or ignores the prompt completely, the **Clarity** and **Overall Score** must be **below 50**. 
+   - State explicitly in the 'Clarity' feedback if they went off-topic.
+
+2. **GRAMMAR & LOGIC:** 
+   - Analyze if the sentences make logical sense. If the user is speaking "word salad" (incoherent words strung together), the Grammar score must be **below 40**.
+   - Penalize incorrect verb tenses, gender agreement, and awkward phrasing heavily.
+   - **Score Guide:**
+     - 90-100: Native speaker level. Flawless logic and grammar.
+     - 75-89: Very good, minor errors that don't impede meaning.
+     - 60-74: Understandable, but frequent errors or unnatural phrasing.
+     - 40-59: Hard to follow, broken sentences, or off-topic.
+     - < 40: Unintelligible or completely irrelevant.
+
+3. **Proficiency Context:**
+   - For '${proficiency}': Evaluate based on expected capabilities, but do not forgive basic mistakes that violate the laws of the language.
+
+4. **Challenge Words:** Analyze the use of these words: [${challengeWords.join(', ')}]. 
+
+Output strictly in JSON.`;
 
         const textPart = {
-            text: `The user is a ${proficiency} learner responding to: "${dailyPrompt}". Challenge words: [${challengeWords.join(', ')}]. Analyze their response.`
+            text: `The user is a ${proficiency} learner responding to the prompt: "${dailyPrompt}". Evaluate this strictly.`
         };
 
         const response = await ai.models.generateContent({

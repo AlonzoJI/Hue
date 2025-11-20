@@ -108,8 +108,11 @@ const App: React.FC = () => {
     
     const handleNavigation = (targetScreen: Screen) => {
         setError(null);
-        setFeedback(null);
-        setTranscription('');
+        // Only clear session state when returning to the prompt screen
+        if (targetScreen === Screen.Prompt) {
+            setFeedback(null);
+            setTranscription('');
+        }
         setScreen(targetScreen);
     };
 
