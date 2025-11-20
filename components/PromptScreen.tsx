@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Header from './Header';
 import LanguageSelector from './LanguageSelector';
@@ -13,6 +14,7 @@ interface PromptScreenProps {
   challengeWords: string[];
   isLoadingWords: boolean;
   proficiencyLevel: ProficiencyLevel;
+  userName: string;
 }
 
 const PromptScreen: React.FC<PromptScreenProps> = ({ 
@@ -24,19 +26,25 @@ const PromptScreen: React.FC<PromptScreenProps> = ({
   onLanguageChange,
   challengeWords,
   isLoadingWords,
-  proficiencyLevel
+  proficiencyLevel,
+  userName
 }) => {
   return (
     <div className="flex flex-col h-full bg-lingo-bg">
       <Header title="Lingo" showProfileIcon onProfileClick={() => onNavigate(Screen.Profile)} />
       <div className="flex-grow flex flex-col justify-between p-6 overflow-y-auto">
         <div>
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start mb-4">
             <LanguageSelector selectedLanguage={targetLanguage} onLanguageChange={onLanguageChange} />
             <div className="text-right">
                 <p className="block text-sm font-bold text-lingo-text-secondary uppercase tracking-wider">Level</p>
                 <p className="mt-1 font-semibold text-lingo-blue">{proficiencyLevel}</p>
             </div>
+          </div>
+
+          <div className="mb-6">
+             <h2 className="text-2xl font-bold text-lingo-text">Hi, {userName} <span className="inline-block animate-pulse">👋</span></h2>
+             <p className="text-lingo-text-secondary">Ready for your daily practice?</p>
           </div>
           
           <div className="mt-6">
@@ -46,12 +54,15 @@ const PromptScreen: React.FC<PromptScreenProps> = ({
 
           <div className="mt-6">
               <p className="text-sm text-accent-challenge font-bold uppercase tracking-wider">Challenge Words</p>
-              <div className="mt-2 p-4 bg-white rounded-xl border border-border-gray min-h-[6rem]">
+              <div className="mt-2">
                 {isLoadingWords ? (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="w-5 h-5 border-2 border-lingo-blue border-t-transparent rounded-full animate-spin"></div>
-                    <p className="ml-3 text-lingo-text-secondary">Generating words...</p>
-                  </div>
+                   /* Compact pulsing skeleton loader */
+                   <div className="flex flex-wrap gap-2">
+                      <div className="h-7 w-20 bg-accent-challenge/10 rounded-full animate-pulse"></div>
+                      <div className="h-7 w-24 bg-accent-challenge/10 rounded-full animate-pulse animation-delay-100"></div>
+                      <div className="h-7 w-16 bg-accent-challenge/10 rounded-full animate-pulse animation-delay-200"></div>
+                      <div className="h-7 w-20 bg-accent-challenge/10 rounded-full animate-pulse animation-delay-300"></div>
+                   </div>
                 ) : (
                    challengeWords.length > 0 ? (
                       <ul className="flex flex-wrap gap-2">
@@ -62,7 +73,7 @@ const PromptScreen: React.FC<PromptScreenProps> = ({
                         ))}
                       </ul>
                    ) : (
-                     <p className="text-lingo-text-secondary text-center">Could not load words. You can still practice.</p>
+                     <p className="text-lingo-text-secondary text-sm">Could not load words.</p>
                    )
                 )}
               </div>
@@ -78,7 +89,7 @@ const PromptScreen: React.FC<PromptScreenProps> = ({
           <button
             onClick={onStartRecording}
             disabled={isLoadingWords}
-            className="w-full bg-lingo-blue text-white font-bold py-4 px-4 rounded-xl hover:bg-lingo-blue-dark transition-colors text-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="w-full bg-lingo-blue text-white font-bold py-4 px-4 rounded-xl hover:bg-lingo-blue-dark transition-colors text-lg disabled:bg-gray-400 disabled:cursor-not-allowed shadow-lg shadow-lingo-blue/30"
           >
             Start Recording
           </button>

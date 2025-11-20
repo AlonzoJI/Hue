@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Screen, AIFeedback, Recording, ProficiencyLevel } from './types';
 import PromptScreen from './components/PromptScreen';
@@ -7,43 +8,88 @@ import FeedbackScreen from './components/FeedbackScreen';
 import CompletionScreen from './components/CompletionScreen';
 import DashboardScreen from './components/DashboardScreen';
 import ProfileScreen from './components/ProfileScreen';
+import OnboardingScreen from './components/OnboardingScreen';
 import { evaluateSpeech, getChallengeWords } from './services/geminiService';
+import { initDB, saveRecordingToDB, getRecordingsFromDB, clearAllRecordingsFromDB } from './services/db';
 
 const PROMPTS = [
     "Describe your perfect weekend getaway.",
     "What is your favorite food and why? Describe how to make it.",
     "Talk about a movie you recently watched and whether you would recommend it.",
     "Describe your dream vacation.",
-    "What are your career goals for the next five years?"
+    "What are your career goals for the next five years?",
+    "If you could have dinner with anyone, living or dead, who would it be and why?",
+    "Describe a challenge you overcame and what you learned from it."
 ];
 
 const App: React.FC = () => {
-    const [screen, setScreen] = useState<Screen>(Screen.Prompt);
+    const [screen, setScreen] = useState<Screen>(Screen.Loading); // Start loading to check DB/Localstorage
     const [currentPrompt] = useState<string>(PROMPTS[Math.floor(Math.random() * PROMPTS.length)]);
     const [feedback, setFeedback] = useState<AIFeedback | null>(null);
     const [transcription, setTranscription] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
-    const [pastRecordings, setPastRecordings] = useState<Recording[]>(() => {
-        const saved = localStorage.getItem('lingo-recordings');
-        return saved ? JSON.parse(saved) : [];
-    });
+    
+    const [userName, setUserName] = useState<string | null>(null);
+    
+    // Initialize with empty array, load from DB on mount
+    const [pastRecordings, setPastRecordings] = useState<Recording[]>([]);
     const [proficiencyLevel, setProficiencyLevel] = useState<ProficiencyLevel>(() => {
         return (localStorage.getItem('lingo-proficiency') as ProficiencyLevel) || 'Beginner';
     });
     
-    const [targetLanguage, setTargetLanguage] = useState<string>('English');
+    const [targetLanguage, setTargetLanguage] = useState<string>(() => {
+        return localStorage.getItem('lingo-language') || 'English';
+    });
+    
     const [challengeWords, setChallengeWords] = useState<string[]>([]);
-    const [isLoadingWords, setIsLoadingWords] = useState<boolean>(true);
+    const [isLoadingWords, setIsLoadingWords] = useState<boolean>(false);
 
+    // Initialization Effect
     useEffect(() => {
-        localStorage.setItem('lingo-recordings', JSON.stringify(pastRecordings));
-    }, [pastRecordings]);
+        const init = async () => {
+            try {
+                // Load Name
+                const storedName = localStorage.getItem('lingo-username');
+                setUserName(storedName);
+
+                // Load DB
+                await initDB();
+                const recordings = await getRecordingsFromDB();
+                const sorted = recordings.sort((a, b) => new Date(b.id).getTime() - new Date(a.id).getTime());
+                setPastRecordings(sorted);
+
+                // Decide initial screen
+                if (!storedName) {
+                    setScreen(Screen.Onboarding);
+                } else {
+                    setScreen(Screen.Prompt);
+                }
+            } catch (err) {
+                console.error("Initialization error", err);
+                // Fallback
+                setScreen(Screen.Prompt);
+            }
+        };
+        init();
+    }, []);
 
     useEffect(() => {
         localStorage.setItem('lingo-proficiency', proficiencyLevel);
-        // Refetch words when proficiency changes
-        fetchWords();
-    }, [proficiencyLevel]);
+        localStorage.setItem('lingo-language', targetLanguage);
+        
+        // Fetch words only if we are past onboarding
+        if (screen !== Screen.Onboarding && screen !== Screen.Loading) {
+            fetchWords();
+        }
+    }, [proficiencyLevel, targetLanguage, screen]);
+
+    const handleOnboardingComplete = (name: string, language: string) => {
+        localStorage.setItem('lingo-username', name);
+        localStorage.setItem('lingo-language', language);
+        setUserName(name);
+        setTargetLanguage(language);
+        setScreen(Screen.Prompt);
+    };
 
     const fetchWords = useCallback(async () => {
         setIsLoadingWords(true);
@@ -60,9 +106,12 @@ const App: React.FC = () => {
         }
     }, [currentPrompt, targetLanguage, proficiencyLevel]);
 
+    // Trigger fetch when dependencies change, but ensure we don't fetch during onboarding
     useEffect(() => {
-        fetchWords();
-    }, [fetchWords]);
+        if (userName && screen === Screen.Prompt) {
+            fetchWords();
+        }
+    }, [currentPrompt, targetLanguage, proficiencyLevel, userName, screen, fetchWords]);
 
     const handleStartRecording = () => {
         setError(null);
@@ -76,7 +125,7 @@ const App: React.FC = () => {
     const handleRecordingComplete = useCallback(async (audioBlob: Blob) => {
         setScreen(Screen.Loading);
         try {
-            const result = await evaluateSpeech(audioBlob, targetLanguage, proficiencyLevel, currentPrompt, challengeWords);
+            const result = await evaluateSpeech(audioBlob, targetLanguage, proficiencyLevel, currentPrompt, challengeWords, userName || 'User');
             if (result.transcription && result.feedback) {
                 setFeedback(result.feedback);
                 setTranscription(result.transcription);
@@ -91,11 +140,13 @@ const App: React.FC = () => {
                     challengeWords: challengeWords,
                     proficiencyLevel: proficiencyLevel,
                 };
+                
+                // Save to DB
+                await saveRecordingToDB(newRecording);
                 setPastRecordings(prev => [newRecording, ...prev]);
 
                 setScreen(Screen.Feedback);
             } else {
-                // This case should be less likely with the more robust service
                 throw new Error("AI evaluation returned an incomplete format.");
             }
         } catch (err) {
@@ -104,11 +155,10 @@ const App: React.FC = () => {
             setError(`Failed to evaluate audio. Error: ${errorMessage}`);
             setScreen(Screen.Prompt);
         }
-    }, [currentPrompt, targetLanguage, proficiencyLevel, challengeWords]);
+    }, [currentPrompt, targetLanguage, proficiencyLevel, challengeWords, userName]);
     
     const handleNavigation = (targetScreen: Screen) => {
         setError(null);
-        // Only clear session state when returning to the prompt screen
         if (targetScreen === Screen.Prompt) {
             setFeedback(null);
             setTranscription('');
@@ -118,6 +168,8 @@ const App: React.FC = () => {
 
     const renderScreen = () => {
         switch (screen) {
+            case Screen.Onboarding:
+                return <OnboardingScreen onComplete={handleOnboardingComplete} />;
             case Screen.Recording:
                 return <RecordingScreen prompt={currentPrompt} onRecordingComplete={handleRecordingComplete} onCancel={handleCancelRecording} challengeWords={challengeWords} />;
             case Screen.Loading:
@@ -135,6 +187,7 @@ const App: React.FC = () => {
                             onBack={() => handleNavigation(Screen.Prompt)}
                             recordings={pastRecordings}
                             setRecordings={setPastRecordings}
+                            userName={userName || 'Guest'}
                         />
             case Screen.Prompt:
             default:
@@ -148,12 +201,13 @@ const App: React.FC = () => {
                             challengeWords={challengeWords}
                             isLoadingWords={isLoadingWords}
                             proficiencyLevel={proficiencyLevel}
+                            userName={userName || 'Guest'}
                         />;
         }
     };
 
     return (
-        <div className="bg-lingo-card-bg max-w-sm mx-auto h-dvh flex flex-col font-sans">
+        <div className="bg-lingo-card-bg max-w-sm mx-auto h-dvh flex flex-col font-sans shadow-2xl sm:rounded-xl sm:my-8 sm:h-[90vh] sm:overflow-hidden">
             {renderScreen()}
         </div>
     );

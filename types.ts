@@ -1,3 +1,4 @@
+
 export type ProficiencyLevel = 'Beginner' | 'Intermediate' | 'Expert';
 
 export interface FeedbackItem {
@@ -33,6 +34,7 @@ export interface Recording {
 }
 
 export enum Screen {
+  Onboarding,
   Prompt,
   Recording,
   Loading,

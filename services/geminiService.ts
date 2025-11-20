@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { AIFeedback, ProficiencyLevel } from '../types';
 
@@ -30,14 +31,19 @@ const challengeWordsSchema = {
 
 export const getChallengeWords = async (prompt: string, targetLanguage: string, proficiency: ProficiencyLevel): Promise<string[]> => {
     try {
-        const systemInstruction = `You are an AI language tutor. Based on the prompt and proficiency level for a ${targetLanguage} learner, generate a JSON array of 3-5 challenging but relevant vocabulary words the user should try to use. Adjust difficulty for the proficiency level. Return only the JSON array.
-- Beginner: Common, useful words.
-- Intermediate: More nuanced or less common words.
-- Expert: Idiomatic expressions or highly specific vocabulary.`;
+        // Strictly enforce proficiency level appropriateness
+        const systemInstruction = `You are an expert language curriculum designer. Generate exactly 4 challenging but appropriate vocabulary words or short idioms for a user learning ${targetLanguage} at a **${proficiency}** level.
+
+Rules:
+1. **Beginner**: Use ONLY high-frequency, daily survival words (A1/A2). NO abstract concepts or rare idioms.
+2. **Intermediate**: Use conversational connectors, B1/B2 nouns/verbs.
+3. **Expert**: Use C1/C2 nuanced vocabulary, formal terms, or native idioms.
+4. The words must be relevant to the topic: "${prompt}".
+5. Return ONLY a JSON array of strings.`;
 
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
-            contents: `Prompt: "${prompt}", Proficiency: ${proficiency}`,
+            contents: `Generate words for: "${prompt}"`,
             config: {
                 systemInstruction,
                 responseMimeType: "application/json",
@@ -53,15 +59,16 @@ export const getChallengeWords = async (prompt: string, targetLanguage: string, 
 
     } catch (error) {
         console.error("Error getting challenge words:", error);
-        throw new Error("Failed to generate challenge words.");
+        // Return a safe fallback if API fails
+        return ["hello", "thank you", "goodbye", "please"];
     }
 };
 
 const feedbackItemSchema = {
     type: Type.OBJECT,
     properties: {
-        score: { type: Type.NUMBER, description: "Strict score from 1 to 100. Be critical." },
-        feedback: { type: Type.STRING, description: "1-2 short, constructive bullet points with examples. State clearly if the error was major." }
+        score: { type: Type.NUMBER, description: "Strict score from 1 to 100." },
+        feedback: { type: Type.STRING, description: "1-2 short, constructive bullet points." }
     },
     required: ["score", "feedback"]
 };
@@ -71,30 +78,28 @@ const feedbackSchema = {
     properties: {
         transcription: {
             type: Type.STRING,
-            description: "The verbatim transcription of the user's audio response."
+            description: "The verbatim transcription."
         },
         feedback: {
             type: Type.OBJECT,
-            description: "Detailed feedback on the user's speech.",
             properties: {
-                grammar: { ...feedbackItemSchema, description: "Rigorous evaluation of syntax, verb conjugation, and sentence structure logic." },
+                grammar: { ...feedbackItemSchema, description: "Evaluation of syntax, verb conjugation, and sentence logic." },
                 pronunciation: feedbackItemSchema,
                 fluency: feedbackItemSchema,
-                vocabulary: { ...feedbackItemSchema, description: "Evaluation of word choice, range, and idiomatic language use." },
+                vocabulary: feedbackItemSchema,
                 clarity: { ...feedbackItemSchema, description: "Evaluation of how clear the speech was AND IF IT DIRECTLY ANSWERED THE PROMPT." },
                 overallScore: {
                     type: Type.NUMBER,
-                    description: "A single, strict overall score from 1 to 100, averaging the other five scores."
+                    description: "The mathematical average of the 5 sub-scores."
                 },
                 challengeWordsUsed: {
                     type: Type.ARRAY,
-                    description: "Evaluation of whether the user included the challenge words correctly and naturally.",
                     items: {
                         type: Type.OBJECT,
                         properties: {
                             word: { type: Type.STRING },
                             used: { type: Type.BOOLEAN },
-                            feedback: { type: Type.STRING, description: "A short, specific comment on how the word was used (e.g., 'Used perfectly in context.', 'Slightly unnatural phrasing, but understandable.')."}
+                            feedback: { type: Type.STRING }
                         },
                         required: ["word", "used", "feedback"]
                     }
@@ -111,7 +116,8 @@ export const evaluateSpeech = async (
     targetLanguage: string,
     proficiency: ProficiencyLevel,
     dailyPrompt: string,
-    challengeWords: string[]
+    challengeWords: string[],
+    userName: string
 ): Promise<{ transcription: string; feedback: AIFeedback }> => {
     try {
         const audioData = await blobToBase64(audioBlob);
@@ -122,35 +128,30 @@ export const evaluateSpeech = async (
             },
         };
 
-        // Stricter System Instruction
-        const systemInstruction = `You are a strict, world-class linguistics examiner for a user learning ${targetLanguage} at a ${proficiency} level. Your name is 'Lingo'.
-Your task is to analyze the user's spoken response and provide a JSON object that strictly adheres to the provided schema.
+        const systemInstruction = `You are 'Lingo', a strict but helpful language examiner. You are evaluating ${userName}, a ${proficiency} level learner of ${targetLanguage}.
 
-**STRICT SCORING GUIDELINES - DO NOT INFLATE SCORES:**
+**SCORING RUBRIC (STRICT):**
 
-1. **PROMPT RELEVANCE (CRITICAL):** The user MUST answer the specific prompt: "${dailyPrompt}". 
-   - If the response is off-topic, vague, or ignores the prompt completely, the **Clarity** and **Overall Score** must be **below 50**. 
-   - State explicitly in the 'Clarity' feedback if they went off-topic.
+1. **PROMPT ALIGNMENT (CRITICAL):**
+   - The user MUST answer the prompt: "${dailyPrompt}".
+   - If the user speaks about something else, the **Clarity** score must be **< 40** and **Overall Score** must be **< 50**. No exceptions.
 
-2. **GRAMMAR & LOGIC:** 
-   - Analyze if the sentences make logical sense. If the user is speaking "word salad" (incoherent words strung together), the Grammar score must be **below 40**.
-   - Penalize incorrect verb tenses, gender agreement, and awkward phrasing heavily.
+2. **GRAMMAR & LOGIC:**
+   - Analyze sentence structure rigorously. 
+   - If sentences do not make logical sense (word salad), **Grammar** score is < 30.
    - **Score Guide:**
-     - 90-100: Native speaker level. Flawless logic and grammar.
-     - 75-89: Very good, minor errors that don't impede meaning.
-     - 60-74: Understandable, but frequent errors or unnatural phrasing.
-     - 40-59: Hard to follow, broken sentences, or off-topic.
-     - < 40: Unintelligible or completely irrelevant.
+     - 90-100: Perfect native-like usage.
+     - 70-89: Understandable but with errors.
+     - < 60: Major errors that impede understanding.
 
-3. **Proficiency Context:**
-   - For '${proficiency}': Evaluate based on expected capabilities, but do not forgive basic mistakes that violate the laws of the language.
+3. **Overall Score:** Must be the exact average of the 5 sub-categories.
 
-4. **Challenge Words:** Analyze the use of these words: [${challengeWords.join(', ')}]. 
+4. **Challenge Words:** Check if ${userName} used: [${challengeWords.join(', ')}].
 
-Output strictly in JSON.`;
+5. **Feedback Style:** Be direct. Address ${userName} by name occasionally in the feedback text if it feels natural.`;
 
         const textPart = {
-            text: `The user is a ${proficiency} learner responding to the prompt: "${dailyPrompt}". Evaluate this strictly.`
+            text: `Evaluate this audio response to the prompt: "${dailyPrompt}".`
         };
 
         const response = await ai.models.generateContent({
@@ -164,13 +165,10 @@ Output strictly in JSON.`;
         });
 
         const jsonText = response.text.trim();
-        if (!jsonText) {
-             throw new Error("AI service returned an empty response.");
-        }
         const parsedResponse = JSON.parse(jsonText);
 
         if (!parsedResponse.transcription || !parsedResponse.feedback) {
-             throw new Error("AI response is missing required transcription or feedback fields.");
+             throw new Error("AI response is missing required fields.");
         }
         
         return {
@@ -178,10 +176,7 @@ Output strictly in JSON.`;
             feedback: parsedResponse.feedback
         };
     } catch (error) {
-        console.error("Error evaluating speech with Gemini:", error);
-        if (error instanceof Error) {
-            throw new Error(`Failed to process audio with AI service: ${error.message}`);
-        }
-        throw new Error("Failed to process audio with AI service due to an unknown error.");
+        console.error("Error evaluating speech:", error);
+        throw new Error("Failed to process audio. Please try again.");
     }
 };
