@@ -32,14 +32,15 @@ const challengeWordsSchema = {
 export const getChallengeWords = async (prompt: string, targetLanguage: string, proficiency: ProficiencyLevel): Promise<string[]> => {
     try {
         // Strictly enforce proficiency level appropriateness
-        const systemInstruction = `You are an expert language curriculum designer. Generate exactly 4 challenging but appropriate vocabulary words or short idioms for a user learning ${targetLanguage} at a **${proficiency}** level.
+        const systemInstruction = `You are an expert language curriculum designer. Generate exactly 4 challenging but appropriate vocabulary words or short idioms IN ${targetLanguage} for a user learning ${targetLanguage} at a **${proficiency}** level.
 
 Rules:
-1. **Beginner**: Use ONLY high-frequency, daily survival words (A1/A2). NO abstract concepts or rare idioms.
-2. **Intermediate**: Use conversational connectors, B1/B2 nouns/verbs.
-3. **Expert**: Use C1/C2 nuanced vocabulary, formal terms, or native idioms.
-4. The words must be relevant to the topic: "${prompt}".
-5. Return ONLY a JSON array of strings.`;
+1. The words MUST be written in ${targetLanguage}, not in English.
+2. **Beginner**: Use ONLY high-frequency, daily survival words (A1/A2). NO abstract concepts or rare idioms.
+3. **Intermediate**: Use conversational connectors, B1/B2 nouns/verbs.
+4. **Expert**: Use C1/C2 nuanced vocabulary, formal terms, or native idioms.
+5. The words must be relevant to the topic: "${prompt}".
+6. Return ONLY a JSON array of strings.`;
 
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
