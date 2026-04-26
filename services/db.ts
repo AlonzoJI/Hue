@@ -1,7 +1,7 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import { Recording } from '../types';
 
-interface LingoDB extends DBSchema {
+interface HueDB extends DBSchema {
   recordings: {
     key: string;
     value: Recording;
@@ -9,14 +9,14 @@ interface LingoDB extends DBSchema {
   };
 }
 
-const DB_NAME = 'lingo-db';
+const DB_NAME = 'hue-db';
 const STORE_NAME = 'recordings';
 
-let dbPromise: Promise<IDBPDatabase<LingoDB>>;
+let dbPromise: Promise<IDBPDatabase<HueDB>>;
 
 export const initDB = () => {
   if (!dbPromise) {
-    dbPromise = openDB<LingoDB>(DB_NAME, 1, {
+    dbPromise = openDB<HueDB>(DB_NAME, 1, {
       upgrade(db) {
         const store = db.createObjectStore(STORE_NAME, {
           keyPath: 'id',

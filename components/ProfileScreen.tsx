@@ -69,34 +69,34 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ proficiency, setProficien
   }
 
   return (
-    <div className="flex flex-col h-full bg-lingo-bg">
+    <div className="flex flex-col h-full bg-hue-bg">
       <Header title="My Profile" onBack={onBack} />
       <div className="flex-grow flex flex-col p-6 overflow-y-auto">
         
         <div className="mb-8">
-             <h1 className="text-3xl font-bold text-lingo-text">{userName}</h1>
-             <p className="text-lingo-text-secondary mt-1">Keep up the great work!</p>
+             <h1 className="text-3xl font-bold text-hue-text">{userName}</h1>
+             <p className="text-hue-text-secondary mt-1">Keep up the great work!</p>
         </div>
 
         <div className="mb-8">
-            <h2 className="text-sm font-bold text-lingo-text-secondary uppercase tracking-wider mb-2">My Level</h2>
+            <h2 className="text-sm font-bold text-hue-text-secondary uppercase tracking-wider mb-2">My Level</h2>
             <ProficiencySelector selectedLevel={proficiency} onLevelChange={setProficiency} />
         </div>
 
         <div className="mb-8">
-            <h2 className="text-sm font-bold text-lingo-text-secondary uppercase tracking-wider mb-2">Statistics</h2>
+            <h2 className="text-sm font-bold text-hue-text-secondary uppercase tracking-wider mb-2">Statistics</h2>
             <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white p-4 rounded-xl border border-border-gray text-center flex flex-col items-center justify-center">
-                    <p className="text-3xl font-bold text-lingo-red mb-1">🔥 {dailyStreak}</p>
-                    <p className="text-xs font-bold text-lingo-text-secondary uppercase tracking-wider">Day Streak</p>
+                    <p className="text-3xl font-bold text-hue-red mb-1">🔥 {dailyStreak}</p>
+                    <p className="text-xs font-bold text-hue-text-secondary uppercase tracking-wider">Day Streak</p>
                 </div>
                  <div className="bg-white p-4 rounded-xl border border-border-gray text-center flex flex-col items-center justify-center">
                     <p className="text-3xl font-bold text-accent-xp mb-1">⭐ {totalXp}</p>
-                    <p className="text-xs font-bold text-lingo-text-secondary uppercase tracking-wider">Total XP</p>
+                    <p className="text-xs font-bold text-hue-text-secondary uppercase tracking-wider">Total XP</p>
                 </div>
                 <div className="bg-white p-4 rounded-xl border border-border-gray text-center col-span-2 flex items-center justify-between px-8">
-                    <span className="text-sm font-bold text-lingo-text-secondary uppercase tracking-wider">Total Sessions</span>
-                    <span className="text-2xl font-bold text-lingo-blue">{totalSessions}</span>
+                    <span className="text-sm font-bold text-hue-text-secondary uppercase tracking-wider">Total Sessions</span>
+                    <span className="text-2xl font-bold text-hue-blue">{totalSessions}</span>
                 </div>
             </div>
         </div>
@@ -104,10 +104,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ proficiency, setProficien
         <div className="flex-grow"></div>
 
         <div>
-             <h2 className="text-sm font-bold text-lingo-text-secondary uppercase tracking-wider mb-2">Account</h2>
+             <h2 className="text-sm font-bold text-hue-text-secondary uppercase tracking-wider mb-2">Account</h2>
             <button
                 onClick={handleClearHistory}
-                className="w-full text-center py-3 px-4 text-lingo-red bg-lingo-red/10 rounded-xl hover:bg-lingo-red/20 transition-colors font-semibold"
+                className="w-full text-center py-3 px-4 text-hue-red bg-hue-red/10 rounded-xl hover:bg-hue-red/20 transition-colors font-semibold"
             >
                 Clear Practice History
             </button>

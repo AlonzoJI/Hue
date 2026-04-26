@@ -14,20 +14,20 @@ interface FeedbackScreenProps {
 
 const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ feedback, transcription, onContinue, onRetry }) => {
   return (
-    <div className="flex flex-col h-full bg-lingo-bg">
+    <div className="flex flex-col h-full bg-hue-bg">
       <Header title="Your Feedback" onBack={onRetry}/>
       <div className="flex-grow p-4 overflow-y-auto">
         
         <div className="p-4 bg-white rounded-2xl border border-border-gray">
-          <h3 className="text-center font-bold text-lg text-lingo-text mb-2">Performance Snapshot</h3>
+          <h3 className="text-center font-bold text-lg text-hue-text mb-2">Performance Snapshot</h3>
           <div className="w-full h-64 mx-auto">
             <RadarChart feedback={feedback} />
           </div>
         </div>
         
-        <div className="my-4 p-4 bg-lingo-card-bg rounded-2xl border border-border-gray">
-            <h3 className="font-bold text-lingo-text mb-2">Your response:</h3>
-            <p className="text-lingo-text-secondary italic">"{transcription}"</p>
+        <div className="my-4 p-4 bg-hue-card-bg rounded-2xl border border-border-gray">
+            <h3 className="font-bold text-hue-text mb-2">Your response:</h3>
+            <p className="text-hue-text-secondary italic">"{transcription}"</p>
         </div>
 
         <ChallengeWordsCard words={feedback.challengeWordsUsed} />
@@ -63,10 +63,10 @@ const FeedbackScreen: React.FC<FeedbackScreenProps> = ({ feedback, transcription
           color="#score-clarity"
         />
       </div>
-      <div className="p-4 border-t border-border-gray bg-lingo-card-bg">
+      <div className="p-4 border-t border-border-gray bg-hue-card-bg">
         <button
           onClick={onContinue}
-          className="w-full bg-lingo-blue text-white font-bold py-3 px-4 rounded-xl hover:bg-lingo-blue-dark transition-colors text-lg"
+          className="w-full bg-hue-blue text-white font-bold py-3 px-4 rounded-xl hover:bg-hue-blue-dark transition-colors text-lg"
         >
           Continue
         </button>

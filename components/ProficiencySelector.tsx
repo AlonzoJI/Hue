@@ -17,8 +17,8 @@ const ProficiencySelector: React.FC<ProficiencySelectorProps> = ({ selectedLevel
           onClick={() => onLevelChange(level)}
           className={`w-full text-center py-2 px-3 rounded-md transition-all text-sm font-bold
             ${selectedLevel === level
-              ? 'bg-white text-lingo-blue shadow'
-              : 'bg-transparent text-lingo-text-secondary hover:bg-gray-300/50'
+              ? 'bg-white text-hue-blue shadow'
+              : 'bg-transparent text-hue-text-secondary hover:bg-gray-300/50'
             }
           `}
         >

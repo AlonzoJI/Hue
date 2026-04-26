@@ -65,38 +65,38 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ recordings, onBack })
   }
 
   return (
-    <div className="flex flex-col h-full bg-lingo-bg">
+    <div className="flex flex-col h-full bg-hue-bg">
       <Header title="My Progress" onBack={onBack} />
       <div className="flex-grow p-4 overflow-y-auto">
         <div className="bg-white p-4 rounded-2xl border border-border-gray mb-6">
-            <h2 className="text-lg font-bold text-lingo-text mb-2">Overall Score Trend</h2>
+            <h2 className="text-lg font-bold text-hue-text mb-2">Overall Score Trend</h2>
             <div className="h-64">
                 {recordings.length > 1 ? (
                     <Line options={chartOptions} data={chartData} />
                 ) : (
-                    <div className="flex items-center justify-center h-full text-center text-lingo-text-secondary">
+                    <div className="flex items-center justify-center h-full text-center text-hue-text-secondary">
                         <p>Complete more sessions to see your progress chart.</p>
                     </div>
                 )}
             </div>
         </div>
 
-        <h2 className="text-lg font-bold text-lingo-text mb-2">Practice History</h2>
+        <h2 className="text-lg font-bold text-hue-text mb-2">Practice History</h2>
         {recordings.length === 0 ? (
-          <p className="text-center text-lingo-text-secondary mt-8">No recordings yet. Complete a prompt to see it here!</p>
+          <p className="text-center text-hue-text-secondary mt-8">No recordings yet. Complete a prompt to see it here!</p>
         ) : (
           <ul className="space-y-3">
             {recordings.map((rec) => (
               <li key={rec.id}>
                 <button
                   onClick={() => setSelectedRecording(rec)}
-                  className="w-full text-left p-4 bg-lingo-card-bg rounded-xl border border-border-gray hover:border-lingo-blue transition-all"
+                  className="w-full text-left p-4 bg-hue-card-bg rounded-xl border border-border-gray hover:border-hue-blue transition-all"
                 >
                   <div className="flex justify-between items-center">
-                    <p className="font-bold text-lingo-text truncate flex-1 pr-4">{rec.prompt}</p>
-                    <span className="text-sm font-semibold bg-lingo-blue/10 text-lingo-blue px-2 py-1 rounded-full">{rec.feedback.overallScore}%</span>
+                    <p className="font-bold text-hue-text truncate flex-1 pr-4">{rec.prompt}</p>
+                    <span className="text-sm font-semibold bg-hue-blue/10 text-hue-blue px-2 py-1 rounded-full">{rec.feedback.overallScore}%</span>
                   </div>
-                  <p className="text-sm text-lingo-text-secondary mt-1">{rec.date}</p>
+                  <p className="text-sm text-hue-text-secondary mt-1">{rec.date}</p>
                 </button>
               </li>
             ))}

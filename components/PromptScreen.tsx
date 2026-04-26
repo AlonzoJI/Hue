@@ -30,26 +30,26 @@ const PromptScreen: React.FC<PromptScreenProps> = ({
   userName
 }) => {
   return (
-    <div className="flex flex-col h-full bg-lingo-bg">
-      <Header title="Lingo" showProfileIcon onProfileClick={() => onNavigate(Screen.Profile)} />
+    <div className="flex flex-col h-full bg-hue-bg">
+      <Header title="Hue" showProfileIcon onProfileClick={() => onNavigate(Screen.Profile)} />
       <div className="flex-grow flex flex-col justify-between p-6 overflow-y-auto">
         <div>
           <div className="flex justify-between items-start mb-4">
             <LanguageSelector selectedLanguage={targetLanguage} onLanguageChange={onLanguageChange} />
             <div className="text-right">
-                <p className="block text-sm font-bold text-lingo-text-secondary uppercase tracking-wider">Level</p>
-                <p className="mt-1 font-semibold text-lingo-blue">{proficiencyLevel}</p>
+                <p className="block text-sm font-bold text-hue-text-secondary uppercase tracking-wider">Level</p>
+                <p className="mt-1 font-semibold text-hue-blue">{proficiencyLevel}</p>
             </div>
           </div>
 
           <div className="mb-6">
-             <h2 className="text-2xl font-bold text-lingo-text">Hi, {userName} <span className="inline-block animate-pulse">👋</span></h2>
-             <p className="text-lingo-text-secondary">Ready for your daily practice?</p>
+             <h2 className="text-2xl font-bold text-hue-text">Hi, {userName} <span className="inline-block animate-pulse">👋</span></h2>
+             <p className="text-hue-text-secondary">Ready for your daily practice?</p>
           </div>
           
           <div className="mt-6">
-              <p className="text-sm text-lingo-text-secondary font-bold uppercase tracking-wider">Today's Topic</p>
-              <p className="text-2xl text-lingo-text mt-2 font-serif">{prompt}</p>
+              <p className="text-sm text-hue-text-secondary font-bold uppercase tracking-wider">Today's Topic</p>
+              <p className="text-2xl text-hue-text mt-2 font-serif">{prompt}</p>
           </div>
 
           <div className="mt-6">
@@ -73,7 +73,7 @@ const PromptScreen: React.FC<PromptScreenProps> = ({
                         ))}
                       </ul>
                    ) : (
-                     <p className="text-lingo-text-secondary text-sm">Could not load words.</p>
+                     <p className="text-hue-text-secondary text-sm">Could not load words.</p>
                    )
                 )}
               </div>
@@ -89,13 +89,13 @@ const PromptScreen: React.FC<PromptScreenProps> = ({
           <button
             onClick={onStartRecording}
             disabled={isLoadingWords}
-            className="w-full bg-lingo-blue text-white font-bold py-4 px-4 rounded-xl hover:bg-lingo-blue-dark transition-colors text-lg disabled:bg-gray-400 disabled:cursor-not-allowed shadow-lg shadow-lingo-blue/30"
+            className="w-full bg-hue-blue text-white font-bold py-4 px-4 rounded-xl hover:bg-hue-blue-dark transition-colors text-lg disabled:bg-gray-400 disabled:cursor-not-allowed shadow-lg shadow-hue-blue/30"
           >
             Start Recording
           </button>
           <button
             onClick={() => onNavigate(Screen.Dashboard)}
-            className="w-full mt-4 text-lingo-blue font-bold py-4 px-4 rounded-xl border-2 border-border-gray hover:bg-gray-100 transition-colors text-lg"
+            className="w-full mt-4 text-hue-blue font-bold py-4 px-4 rounded-xl border-2 border-border-gray hover:bg-gray-100 transition-colors text-lg"
           >
             View Progress
           </button>

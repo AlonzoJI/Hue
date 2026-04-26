@@ -34,11 +34,11 @@ const App: React.FC = () => {
     // Initialize with empty array, load from DB on mount
     const [pastRecordings, setPastRecordings] = useState<Recording[]>([]);
     const [proficiencyLevel, setProficiencyLevel] = useState<ProficiencyLevel>(() => {
-        return (localStorage.getItem('lingo-proficiency') as ProficiencyLevel) || 'Beginner';
+        return (localStorage.getItem('hue-proficiency') as ProficiencyLevel) || 'Beginner';
     });
     
     const [targetLanguage, setTargetLanguage] = useState<string>(() => {
-        return localStorage.getItem('lingo-language') || 'English';
+        return localStorage.getItem('hue-language') || 'English';
     });
     
     const [challengeWords, setChallengeWords] = useState<string[]>([]);
@@ -49,7 +49,7 @@ const App: React.FC = () => {
         const init = async () => {
             try {
                 // Load Name
-                const storedName = localStorage.getItem('lingo-username');
+                const storedName = localStorage.getItem('hue-username');
                 setUserName(storedName);
 
                 // Load DB
@@ -74,8 +74,8 @@ const App: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        localStorage.setItem('lingo-proficiency', proficiencyLevel);
-        localStorage.setItem('lingo-language', targetLanguage);
+        localStorage.setItem('hue-proficiency', proficiencyLevel);
+        localStorage.setItem('hue-language', targetLanguage);
         
         // Fetch words only if we are past onboarding
         if (screen !== Screen.Onboarding && screen !== Screen.Loading) {
@@ -84,8 +84,8 @@ const App: React.FC = () => {
     }, [proficiencyLevel, targetLanguage, screen]);
 
     const handleOnboardingComplete = (name: string, language: string) => {
-        localStorage.setItem('lingo-username', name);
-        localStorage.setItem('lingo-language', language);
+        localStorage.setItem('hue-username', name);
+        localStorage.setItem('hue-language', language);
         setUserName(name);
         setTargetLanguage(language);
         setScreen(Screen.Prompt);
@@ -207,7 +207,7 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="bg-lingo-card-bg max-w-sm mx-auto h-dvh flex flex-col font-sans shadow-2xl sm:rounded-xl sm:my-8 sm:h-[90vh] sm:overflow-hidden">
+        <div className="bg-hue-card-bg max-w-sm mx-auto h-dvh flex flex-col font-sans shadow-2xl sm:rounded-xl sm:my-8 sm:h-[90vh] sm:overflow-hidden">
             {renderScreen()}
         </div>
     );

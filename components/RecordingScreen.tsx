@@ -39,11 +39,11 @@ const RecordingScreen: React.FC<RecordingScreenProps> = ({ prompt, challengeWord
   };
 
   return (
-    <div className="flex flex-col h-full bg-lingo-bg">
+    <div className="flex flex-col h-full bg-hue-bg">
       <Header title="Recording..." onBack={handleCancel} />
       <div className="flex-grow flex flex-col items-center justify-between p-6">
         <div>
-            <p className="text-xl text-lingo-text text-center mt-8 font-serif">{prompt}</p>
+            <p className="text-xl text-hue-text text-center mt-8 font-serif">{prompt}</p>
             <div className="mt-4">
                 <p className="text-center text-sm text-accent-challenge font-bold uppercase tracking-wider">Try using</p>
                 <div className="mt-2 flex flex-wrap justify-center gap-2">
@@ -58,13 +58,13 @@ const RecordingScreen: React.FC<RecordingScreenProps> = ({ prompt, challengeWord
 
         <div className="relative w-28 h-28 flex items-center justify-center">
           <div
-            className="absolute inset-0 rounded-full bg-lingo-red/30 transition-transform duration-100 ease-out"
+            className="absolute inset-0 rounded-full bg-hue-red/30 transition-transform duration-100 ease-out"
             style={ringStyle}
             aria-hidden="true"
           ></div>
           <button
             onClick={handleStop}
-            className="relative w-24 h-24 bg-lingo-red rounded-full flex items-center justify-center shadow-lg z-10 hover:bg-red-700 transition-colors"
+            className="relative w-24 h-24 bg-hue-red rounded-full flex items-center justify-center shadow-lg z-10 hover:bg-red-700 transition-colors"
             aria-label="Stop recording"
           >
             <div className="w-8 h-8 bg-white rounded-md"></div>
@@ -72,8 +72,8 @@ const RecordingScreen: React.FC<RecordingScreenProps> = ({ prompt, challengeWord
         </div>
 
         <div>
-          {error && <p className="text-lingo-red text-center mb-4">{error}</p>}
-          <p className="text-lingo-text-secondary text-center mb-8">Tap button to stop recording</p>
+          {error && <p className="text-hue-red text-center mb-4">{error}</p>}
+          <p className="text-hue-text-secondary text-center mb-8">Tap button to stop recording</p>
         </div>
       </div>
     </div>
