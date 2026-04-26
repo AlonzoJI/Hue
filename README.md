@@ -2,19 +2,53 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Hue
 
-This contains everything you need to run your app locally.
+An AI-powered app built with the Gemini API and deployed on Vercel.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1ma5PggFU8WEPWlqBV6BtnfeVupXJPfOD
+## Live Demo
 
-## Run Locally
+[hue.vercel.app](https://vercel.com/jared-alonzos-projects/hue)
 
-**Prerequisites:**  Node.js
+## About
 
+Hue is an AI Studio app powered by the Gemini API. Hue is a language learning app which grades your speech with daily challenges.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Getting Started
+
+**Prerequisites:** Node.js
+
+1. Clone the repo
+   ```bash
+   git clone https://github.com/your-username/hue.git
+   cd hue
+   ```
+
+2. Install dependencies
+   ```bash
+   npm install
+   ```
+
+3. Set up environment variables — create a `.env.local` file and add your Gemini API key:
+   ```env
+   GEMINI_API_KEY=your_api_key_here
+   ```
+
+4. Run the development server
+   ```bash
+   npm run dev
+   ```
+
+## Tech Stack
+
+- **Framework:** Next.js
+- **AI:** Google Gemini API
+- **Deployment:** Vercel
+
+## Deployment
+
+To deploy your own instance, push the repo to GitHub, import it into [Vercel](https://vercel.com), and add `GEMINI_API_KEY` to your [environment variables](https://vercel.com/jared-alonzos-projects/hue/settings/environment-variables).
+
+## License
+
+MIT
