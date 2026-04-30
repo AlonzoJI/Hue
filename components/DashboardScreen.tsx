@@ -1,108 +1,101 @@
 import React, { useState, useMemo } from 'react';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { Recording, AIFeedback } from '../types';
-import Header from './Header';
+import { Recording } from '../types';
+import { C, F, StatusBar, HomeIndicator, NavBar, Label, Card } from './IOSFrame';
 import FeedbackScreen from './FeedbackScreen';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip);
 
-interface DashboardScreenProps {
-  recordings: Recording[];
-  onBack: () => void;
-}
+interface Props { recordings: Recording[]; onBack: () => void; }
 
-const DashboardScreen: React.FC<DashboardScreenProps> = ({ recordings, onBack }) => {
-  const [selectedRecording, setSelectedRecording] = useState<Recording | null>(null);
+const DashboardScreen: React.FC<Props> = ({ recordings, onBack }) => {
+  const [selected, setSelected] = useState<Recording | null>(null);
 
   const chartData = useMemo(() => {
-    const reversedRecordings = [...recordings].reverse();
-    const labels = reversedRecordings.map(rec => new Date(rec.id).toLocaleDateString());
-    
-    const datasets = [
-        {
-            label: 'Overall Score',
-            data: reversedRecordings.map(rec => rec.feedback.overallScore),
-            borderColor: '#007AFF',
-            backgroundColor: 'rgba(0, 122, 255, 0.2)',
-            fill: true,
-            tension: 0.3,
-            yAxisID: 'y',
-        }
-    ];
-
-    return { labels, datasets };
+    const rev = [...recordings].reverse();
+    return {
+      labels: rev.map(r => new Date(r.id).toLocaleDateString('en', { month: 'short', day: 'numeric' })),
+      datasets: [{
+        label: 'Score',
+        data: rev.map(r => r.feedback.overallScore),
+        borderColor: C.blue,
+        backgroundColor: 'rgba(37,99,235,0.08)',
+        fill: true, tension: 0.3,
+      }],
+    };
   }, [recordings]);
 
   const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      title: { display: false },
-    },
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
     scales: {
-      y: {
-        beginAtZero: true,
-        max: 100,
-        ticks: { color: '#6B7280' }
-      },
-      x: {
-        ticks: { color: '#6B7280' }
-      }
-    }
+      y: { beginAtZero: true, max: 100, ticks: { color: C.textMuted, font: { size: 11 } }, grid: { color: C.divider } },
+      x: { ticks: { color: C.textMuted, font: { size: 11 } }, grid: { color: 'transparent' } },
+    },
   };
 
-  if (selectedRecording) {
-    return (
-      <FeedbackScreen
-        feedback={selectedRecording.feedback}
-        transcription={selectedRecording.transcription}
-        onContinue={() => setSelectedRecording(null)}
-        onRetry={() => setSelectedRecording(null)}
-      />
-    );
-  }
+  if (selected) return (
+    <FeedbackScreen
+      feedback={selected.feedback}
+      transcription={selected.transcription}
+      onContinue={() => setSelected(null)}
+      onRetry={() => setSelected(null)}
+    />
+  );
 
   return (
-    <div className="flex flex-col h-full bg-hue-bg">
-      <Header title="My Progress" onBack={onBack} />
-      <div className="flex-grow p-4 overflow-y-auto">
-        <div className="bg-white p-4 rounded-2xl border border-border-gray mb-6">
-            <h2 className="text-lg font-bold text-hue-text mb-2">Overall Score Trend</h2>
-            <div className="h-64">
-                {recordings.length > 1 ? (
-                    <Line options={chartOptions} data={chartData} />
-                ) : (
-                    <div className="flex items-center justify-center h-full text-center text-hue-text-secondary">
-                        <p>Complete more sessions to see your progress chart.</p>
-                    </div>
-                )}
-            </div>
-        </div>
+    <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', background: C.bg }}>
+      <StatusBar />
+      <NavBar title="My Progress" onBack={onBack} backLabel="Back" />
 
-        <h2 className="text-lg font-bold text-hue-text mb-2">Practice History</h2>
+      <div className="screen-scroll" style={{ flex: 1, padding: '8px 24px 32px' }}>
+        {/* Chart */}
+        <Card style={{ padding: '16px', marginBottom: 24 }}>
+          <Label style={{ marginBottom: 10 }}>Overall score trend</Label>
+          <div style={{ height: 160 }}>
+            {recordings.length > 1 ? (
+              <Line options={chartOptions} data={chartData} />
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center' }}>
+                <p style={{ fontSize: 14, color: C.textMuted }}>Complete more sessions to see your progress chart.</p>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* History */}
+        <Label style={{ marginBottom: 12 }}>Practice history</Label>
         {recordings.length === 0 ? (
-          <p className="text-center text-hue-text-secondary mt-8">No recordings yet. Complete a prompt to see it here!</p>
+          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+            <p style={{ fontSize: 14, color: C.textMuted }}>No recordings yet. Complete a session to see it here.</p>
+          </div>
         ) : (
-          <ul className="space-y-3">
-            {recordings.map((rec) => (
-              <li key={rec.id}>
-                <button
-                  onClick={() => setSelectedRecording(rec)}
-                  className="w-full text-left p-4 bg-hue-card-bg rounded-xl border border-border-gray hover:border-hue-blue transition-all"
-                >
-                  <div className="flex justify-between items-center">
-                    <p className="font-bold text-hue-text truncate flex-1 pr-4">{rec.prompt}</p>
-                    <span className="text-sm font-semibold bg-hue-blue/10 text-hue-blue px-2 py-1 rounded-full">{rec.feedback.overallScore}%</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {recordings.map(rec => {
+              const score = Math.round(rec.feedback.overallScore);
+              const scoreColor = score >= 80 ? C.green : score >= 60 ? C.blue : C.red;
+              return (
+                <button key={rec.id} onClick={() => setSelected(rec)} style={{
+                  background: C.card, border: `1px solid ${C.border}`, borderRadius: 10,
+                  padding: '14px 16px', textAlign: 'left', cursor: 'pointer',
+                  fontFamily: F.sans, width: '100%', transition: 'border-color 0.15s',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                    <p style={{ fontSize: 14, fontWeight: 500, color: C.text, flex: 1, lineHeight: 1.4 }}>{rec.prompt}</p>
+                    <span style={{
+                      fontFamily: F.mono, fontSize: 14, fontWeight: 700, color: scoreColor,
+                      background: `${scoreColor}12`, padding: '3px 8px', borderRadius: 4, flexShrink: 0,
+                    }}>{score}</span>
                   </div>
-                  <p className="text-sm text-hue-text-secondary mt-1">{rec.date}</p>
+                  <p style={{ fontSize: 12, color: C.textMuted, marginTop: 6 }}>{rec.date} · {rec.targetLanguage}</p>
                 </button>
-              </li>
-            ))}
-          </ul>
+              );
+            })}
+          </div>
         )}
       </div>
+      <HomeIndicator />
     </div>
   );
 };

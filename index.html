@@ -3,34 +3,113 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hue - AI Language Coach</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'hue-blue': '#007AFF',
-              'hue-blue-dark': '#005ECC',
-              'hue-red': '#FF3B30',
-              'hue-text': '#1A1A1A',
-              'hue-text-secondary': '#6B7280',
-              'hue-bg': '#F7F7F7',
-              'hue-card-bg': '#FFFFFF',
-              'score-grammar': '#007AFF',
-              'score-pronunciation': '#34C759',
-              'score-fluency': '#FF9500',
-              'score-vocabulary': '#8E44AD',
-              'score-clarity': '#FF2D55',
-              'accent-xp': '#FFD60A',
-              'border-gray': '#E5E7EB',
-              'accent-challenge': '#8E44AD',
-            },
-          },
-        },
+    <title>Hue — AI Language Coach</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { height: 100%; font-family: 'Space Grotesk', sans-serif; }
+      body { background: #ECECEC; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+
+      /* Scrollbar */
+      .screen-scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+      .screen-scroll::-webkit-scrollbar { display: none; }
+
+      /* Screen fade */
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+      .fade-in { animation: fadeIn 0.2s ease; }
+
+      /* Waveform bars */
+      @keyframes wave1 { 0%,100%{height:6px} 50%{height:22px} }
+      @keyframes wave2 { 0%,100%{height:10px} 50%{height:28px} }
+      @keyframes wave3 { 0%,100%{height:4px} 50%{height:18px} }
+      @keyframes wave4 { 0%,100%{height:14px} 50%{height:32px} }
+      @keyframes wave5 { 0%,100%{height:8px} 50%{height:24px} }
+      .bar1{animation:wave1 0.9s ease-in-out infinite;}
+      .bar2{animation:wave2 0.9s ease-in-out infinite 0.1s;}
+      .bar3{animation:wave3 0.9s ease-in-out infinite 0.2s;}
+      .bar4{animation:wave4 0.9s ease-in-out infinite 0.15s;}
+      .bar5{animation:wave5 0.9s ease-in-out infinite 0.05s;}
+      .bar6{animation:wave1 0.9s ease-in-out infinite 0.25s;}
+      .bar7{animation:wave2 0.9s ease-in-out infinite 0.3s;}
+      .bar8{animation:wave3 0.9s ease-in-out infinite 0.08s;}
+      .bar9{animation:wave4 0.9s ease-in-out infinite 0.18s;}
+      .bar10{animation:wave5 0.9s ease-in-out infinite 0.22s;}
+      .bar11{animation:wave1 0.9s ease-in-out infinite 0.35s;}
+      .bar12{animation:wave2 0.9s ease-in-out infinite 0.12s;}
+
+      /* Recording pulse */
+      @keyframes pulse-ring { 0%{transform:scale(1);opacity:0.5} 100%{transform:scale(1.5);opacity:0} }
+      .pulse-ring { animation: pulse-ring 1.5s ease-out infinite; }
+
+      /* Splash */
+      @keyframes splashLogo { 0%{opacity:0;transform:scale(0.85)} 60%{opacity:1;transform:scale(1.04)} 100%{opacity:1;transform:scale(1)} }
+      @keyframes splashLine { 0%{opacity:0;transform:translateY(8px)} 100%{opacity:1;transform:translateY(0)} }
+      @keyframes orb1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(12px,-18px) scale(1.1)} }
+      @keyframes orb2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-10px,14px) scale(0.92)} }
+      @keyframes orb3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(8px,10px) scale(1.06)} }
+      .splash-logo { animation: splashLogo 0.9s cubic-bezier(0.34,1.56,0.64,1) both; }
+      .splash-l1 { animation: splashLine 0.5s ease both 0.7s; }
+      .splash-l2 { animation: splashLine 0.5s ease both 0.9s; }
+      .splash-hint { animation: splashLine 0.5s ease both 1.8s; }
+      .orb1 { animation: orb1 6s ease-in-out infinite; }
+      .orb2 { animation: orb2 7s ease-in-out infinite; }
+      .orb3 { animation: orb3 5s ease-in-out infinite; }
+
+      /* Completion */
+      @keyframes compRing { 0%{stroke-dashoffset:220} 100%{stroke-dashoffset:0} }
+      @keyframes compCheck { 0%{opacity:0;transform:scale(0.5)} 100%{opacity:1;transform:scale(1)} }
+      @keyframes compFade { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+      .comp-ring { stroke-dasharray:220; stroke-dashoffset:220; animation: compRing 0.8s cubic-bezier(0.4,0,0.2,1) 0.3s forwards; }
+      .comp-check { animation: compCheck 0.4s cubic-bezier(0.34,1.56,0.64,1) 1s both; }
+      .comp-t1 { animation: compFade 0.4s ease 1.1s both; }
+      .comp-t2 { animation: compFade 0.4s ease 1.3s both; }
+      .comp-btn { animation: compFade 0.4s ease 1.5s both; }
+
+      /* Progress bar */
+      .progress-track { height: 3px; background: #f0f0f0; border-radius: 2px; overflow: hidden; }
+      .progress-fill { height: 100%; background: linear-gradient(90deg, #2563EB, #7c3aed); border-radius: 2px; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+
+      /* Score ring */
+      .score-ring { transition: stroke-dashoffset 1s ease; }
+
+      /* Inputs */
+      .hue-input {
+        width: 100%; padding: 14px 16px; border: 1px solid #e5e7eb; border-radius: 10px;
+        font-family: 'Space Grotesk', sans-serif; font-size: 16px; color: #0a0a0a;
+        background: #fff; outline: none; transition: border-color 0.15s;
       }
-    </script>
-  <script type="importmap">
+      .hue-input:focus { border-color: #2563EB; box-shadow: 0 0 0 3px #2563eb14; }
+      .hue-input::placeholder { color: #c4c9d4; }
+
+      /* Segment control */
+      .seg { display: flex; gap: 2px; padding: 3px; background: #f0f0f0; border-radius: 8px; }
+      .seg-btn {
+        flex: 1; padding: 7px 12px; border-radius: 6px; border: none;
+        font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 500;
+        cursor: pointer; transition: all 0.15s; background: transparent; color: #6b7280;
+      }
+      .seg-btn.active { background: #fff; color: #0a0a0a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+      /* Goal / lang / level selectable rows */
+      .sel-row {
+        display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+        border: 1px solid #e5e7eb; border-radius: 10px; cursor: pointer;
+        background: #fff; transition: all 0.15s; width: 100%; font-family: 'Space Grotesk', sans-serif;
+      }
+      .sel-row:hover { border-color: #2563EB; background: #2563eb04; }
+      .sel-row.active { border-color: #2563EB; background: #2563eb08; }
+      .sel-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #d1d5db; flex-shrink: 0; display:flex;align-items:center;justify-content:center; transition: all 0.15s; }
+      .sel-row.active .sel-dot { border-color: #2563EB; background: #2563EB; }
+
+      /* Loading spinner */
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .spin { animation: spin 0.8s linear infinite; }
+
+      /* AI analyzing */
+      @keyframes analyzeOrb { 0%,100%{transform:scale(1);opacity:0.6} 50%{transform:scale(1.15);opacity:1} }
+      .analyze-orb { animation: analyzeOrb 2s ease-in-out infinite; }
+    </style>
+    <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@^19.1.0",
@@ -42,9 +121,9 @@
     "idb": "https://esm.sh/idb@^7.1.1"
   }
 }
-</script>
-</head>
-  <body class="bg-hue-bg">
+    </script>
+  </head>
+  <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
